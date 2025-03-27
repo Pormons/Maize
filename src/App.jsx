@@ -413,7 +413,7 @@ function App() {
 
                 {selectedImage && (
                   <>
-                  <div className="text-md text-white">
+                  <div className="text-sm text-white">
                     <span>
                       created by: pormonskie
                     </span>
@@ -432,7 +432,7 @@ function App() {
                         <img
                           src={drawAnnotations(results)}
                           alt="Annotations"
-                          className="absolute h-[80%]"
+                          className="absolute h-[85%]"
                           style={{ pointerEvents: 'none' }} // Ensure it doesn't block clicks
                         />
                       )}
