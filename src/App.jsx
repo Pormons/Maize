@@ -15,7 +15,6 @@ import ResultList from './components/ResultList';
 import SliderRange from './components/SliderRange';
 import Switch from './components/Switch';
 import { diseasesInfo } from './utils/diseasesHelper';
-import { runInference } from './utils/predict';
 import { Camera, Home, Settings } from "lucide-react";
 import { supabase } from "./Supabase";
 import axios from "axios";
@@ -227,36 +226,6 @@ function App() {
     return new Blob([arrayBuffer], { type: mimeString });
   };
 
-
-  const analyzeImage = async () => {
-    if (tensorData) {
-      setInferencing(true);
-      try {
-        const { detectionResults, inferenceTime } = await runInference(session, tensorData);
-        setTimeout(() => {
-          setInferencing(false);
-          setResults(detectionResults)
-          setInference(inferenceTime);
-        }, [1000])
-      } catch (error) {
-        console.log(error)
-      }
-    } else {
-      setInferencing(false);
-      toast.error('Upload an Image', {
-        position: "top-center",
-        autoClose: 3000,
-        hideProgressBar: true,
-        closeOnClick: false,
-        pauseOnHover: false,
-        draggable: false,
-        progress: undefined,
-        theme: "colored",
-        transition: Slide,
-      });
-      console.log(error)
-    }
-  }
 
   const handleConfidenceChange = (value) => {
     setConfidence(value);
