@@ -13,7 +13,7 @@ const Switch = ({ id, label, initialState = false, onChange }) => {
 
     return (
         <div className="flex items-center w-full justify-between space-x-2">
-            <span className="text-sm font-medium text-black">
+            <span className="text-xs md:text-sm font-medium text-black">
                 {label}
             </span>
             <button

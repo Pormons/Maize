@@ -30,6 +30,8 @@ function App() {
   const [imageDimensions, setImageDimensions] = useState(null);
   const [confidence, setConfidence] = useState(40);
   const [showAnnotations, setAnnotations] = useState(true);
+  const [showConfindence, setShowConfidence] = useState(true);
+  const [translate, setTranslate] = useState(false);
   const [inferencing, setInferencing] = useState(false);
   const [results, setResults] = useState([])
   const [inference, setInference] = useState(null);
@@ -193,6 +195,8 @@ function App() {
       setResults(response.data.predictions)
       const diseases = response.data.predictions.map(value => labelMap[value.class]);
       setDiseases(diseases);
+
+      console.log('response', response.data.predictions);
       setInferencing(false);
     } catch (error) {
       setInferencing(false);
@@ -239,6 +243,15 @@ function App() {
 
   const toggleAnnotations = (value) => {
     setAnnotations(value)
+  }
+
+  const toggleTranslation = (value) => {
+    setTranslate(value)
+  }
+
+
+  const toggleConfidence = (value) => {
+    setShowConfidence(value)
   }
 
   const drawAnnotations = (results) => {
@@ -359,7 +372,124 @@ function App() {
   return (
     <>
       <ToastContainer />
-      <div className='min-h-svh md:h-svh flex items-center justify-center bg-[#081509]'>
+      <Dialog isOpen={isSettingsOpen} onClose={closeSettings} title="Settings">
+        <div className="flex flex-col w-full justify-center items-center  gap-5">
+          <Switch
+            label={'Translated to bisaya'}
+            initialState={false}
+            onChange={toggleTranslation}
+          />
+          <Switch
+            label={'Show Annotations'}
+            initialState={true}
+            onChange={toggleAnnotations}
+          />
+          <Switch
+            label={'Show Confidence Level'}
+            initialState={true}
+            onChange={toggleConfidence}
+          />
+          <SliderRange
+            label={'Confidence'}
+            initialValue={25}
+            onChange={handleConfidenceChange}
+          />
+        </div>
+      </Dialog>
+      <Dialog isOpen={isDialogOpen} onClose={closeDialog} title="Detailed Report">
+        <DiseaseDetails results={diseasesInfo(diseasesResult, translate)} />
+      </Dialog>
+      <div className="md:hidden relative w-full h-screen flex bg-[#081509] flex-col overflow-hidden">
+        {/* Floating Bottom Nav */}
+        <div className="fixed bottom-3 w-full flex justify-center">
+          <div className="bg-white rounded-full h-[4rem] w-[90%] shadow-lg flex justify-around items-center px-4 relative">
+            <button
+              onClick={handleButtonClick}
+              className="absolute transition-all hover:scale-95 top-[-30px] left-1/2 transform -translate-x-1/2 bg-green-600 hover:bg-green-700 text-white rounded-full w-[5rem] h-[5rem] flex items-center justify-center shadow-lg"
+            >
+              <Camera color="white" size={24} />
+            </button>
+            <button onClick={handleHome} className="text-gray-500 hover:text-black">
+              <Home color="black" size={24} />
+            </button>
+            <button className="text-gray-500 hover:text-black"></button>
+            <button onClick={openSettings} className="text-gray-500 hover:text-black">
+              <Settings color="black" size={24} />
+            </button>
+          </div>
+        </div>
+
+        <div className="h-full flex flex-col items-center">
+          {!selectedImage && (
+            <div className="text-center h-full text-white flex flex-col justify-center gap-5 items-center p-4">
+              <img src={logo} className="h-24 w-24" alt="logo" />
+              <h2 className="font-bold text-3xl">Welcome!</h2>
+              <p className="text-md">Click the camera button to start analyzing your maize leaf.</p>
+            </div>
+          )}
+
+          {selectedImage && (
+            <>
+              <div className="text-sm mt-12 text-white">
+                <span>created by: pormonskie</span>
+              </div>
+              <div
+                id="main-canvas"
+                className="relative flex justify-center items-center bg-white rounded-xl w-full h-[24rem] overflow-hidden"
+              >
+                <img
+                  src={selectedImage}
+                  alt="Resized"
+                  className="absolute h-full w-full object-contain"
+                />
+
+                {results.length > 0 && showAnnotations && (
+                  <img
+                    src={drawAnnotations(results)}
+                    alt="Annotations"
+                    className="absolute  h-[90%]"
+                    style={{ pointerEvents: "none" }}
+                  />
+                )}
+              </div>
+            </>
+          )}
+          {results.length > 0 && showConfindence && (
+            <div className='max-h-[6rem] w-[90%] p-2 rounded-lg mt-4 bg-white scrollbar scrollbar-thumb-green-800 scrollbar-track-transparent flex flex-col overflow-y-scroll'>
+              <ResultList results={results.filter(result => result.confidence * 100 >= confidence)} />
+            </div>
+          )}
+          <div className="px-24 mt-5 flex flex-col gap-2 w-full mb-24">
+            {selectedImage && (
+              <button
+                disabled={inferencing}
+                onClick={() => uploadImageToSupabase()}
+                className="bg-green-600 font-bold hover:scale-95 transition-all h-12 flex items-center justify-center gap-2 text-white text-[30px] w-full rounded-full"
+              >
+                {inferencing ? (
+                  <AiOutlineLoading3Quarters className="h-6 w-6 animate-spin" />
+                ) : (
+                  <TbPhotoScan className="h-6 w-6" />
+                )}
+                <span className="text-sm">Analyze Image</span>
+              </button>
+            )}
+            {results.length > 0 && (
+              <button
+                onClick={openDialog}
+                className="bg-blue-600 font-bold hover:scale-95 transition-all h-12 flex items-center justify-center gap-2 text-white text-[30px] w-full rounded-full"
+              >
+                <TbFileReport className="h-6 w-6" />
+                <span className="text-sm">Detailed Report</span>
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+
+
+      <div className='hidden bg-[#081509] md:flex md:h-screen items-center justify-center '>
 
         {error && !initializing && (
           <div className='flex flex-col h-full justify-center items-center'>
@@ -386,85 +516,6 @@ function App() {
 
         {!initializing && !error && (
           <>
-            {/* Mobile View */}
-            <div className="md:hidden w-full h-svh flex flex-col">
-              {/* Floating Bottom Nav */}
-              <div className="fixed bottom-8 w-full h-28 p-5 flex justify-center">
-                <div className="bg-white rounded-full h-[6rem] w-[90%] shadow-lg flex justify-around items-center px-4 relative">
-                  <button
-                    onClick={handleButtonClick}
-                    className="absolute transition-all hover:scale-95 top-[-43px] left-1/2 transform -translate-x-1/2 bg-green-600 hover:bg-green-700 text-white rounded-full w-28 h-28 flex items-center justify-center shadow-lg "
-                  >
-                    <Camera color="white" size={48} />
-                  </button>
-                  <button onClick={handleHome} className="text-gray-500 hover:text-black"><Home color="black" size={48} /></button>
-                  <button className="text-gray-500 hover:text-black"></button>
-                  <button onClick={openSettings} className="text-gray-500 hover:text-black"><Settings color="black" size={48} /></button>
-                </div>
-              </div>
-              <div className="h-full p-5 bg-[#081509]">
-                {!selectedImage && (
-                  <div className="text-center h-full text-white flex flex-col justify-center gap-5 items-center p-4">
-                    <img src={logo} className="h-24 w-24" alt="logo" />
-                    <h2 className=" font-bold text-[5rem]">Welcome!</h2>
-                    <p className="text-lg">Click the camera button to start analyzing your maize leaf.</p>
-                  </div>
-                )}
-
-                {selectedImage && (
-                  <>
-                  <div className="text-sm text-white">
-                    <span>
-                      created by: pormonskie
-                    </span>
-                  </div>
-                  <div id='main-canvas' className="mt-24 relative flex justify-center items-center rounded-xl w-full h-[45rem]">
-                    <>
-                      {/* Background image */}
-                      <img
-                        src={selectedImage}
-                        alt="Resized"
-                        className="absolute h-full w-full object-contain"
-                      />
-
-                      {/* Annotations (foreground) */}
-                      {results.length > 0 && showAnnotations && (
-                        <img
-                          src={drawAnnotations(results)}
-                          alt="Annotations"
-                          className="absolute h-[85%]"
-                          style={{ pointerEvents: 'none' }} // Ensure it doesn't block clicks
-                        />
-                      )}
-                    </>
-                  </div>
-                  </>
-                )}
-
-                <div className="mt-2 px-24 flex flex-col gap-5" >
-                  {selectedImage && (
-                    <button disabled={inferencing} onClick={uploadImageToSupabase} className="bg-green-600 font-bold hover:scale-95 transition-all h-20 flex items-center justify-center gap-5 text-white text-[30px] w-full rounded-full">
-                      {inferencing ?
-                        <AiOutlineLoading3Quarters className='h-12 w-12 animate-spin' />
-                        : <TbPhotoScan className='h-12 w-12' />
-                      }
-                      <span className='text-2xl'>
-                        Analyze Image
-                      </span>
-                    </button>
-                  )}
-                  {results.length > 0 && (
-                    <button onClick={openDialog} className="bg-blue-600 font-bold hover:scale-95 transition-all h-20 flex items-center justify-center gap-5 text-white text-[30px] w-full rounded-full">
-                      <TbFileReport className='h-12 w-12' />
-                      <span className="text-2xl">
-                        Detailed Report
-                      </span>
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-            {/* Desktop View */}
             <div className='hidden rounded-md md:flex flex-col-reverse md:flex-row w-full h-full md:w-[90%] md:h-[80%] overflow-y-auto overflow-x-hidden bg-slate-50'>
               <div id='sidebar' className='md:grow-0 w-full md:w-[18%] gap-2 p-2 flex flex-col items-center'>
                 <input
@@ -491,7 +542,7 @@ function App() {
                     <b>Size:</b> {metadata.size} mb
                   </span>
                 </div>
-                <button disabled={inferencing} onClick={uploadImageToSupabase} className='grow-0 p-2 font-bold text-white transition-all hover:scale-95 hover:bg-green-600 flex items-center justify-center gap-2 bg-green-800 rounded-md w-full h-10 md:h-16'>
+                <button disabled={inferencing} onClick={() => uploadImageToSupabase()} className='grow-0 p-2 font-bold text-white transition-all hover:scale-95 hover:bg-green-600 flex items-center justify-center gap-2 bg-green-800 rounded-md w-full h-10 md:h-16'>
                   {inferencing ?
                     <AiOutlineLoading3Quarters className='h-5 w-5 animate-spin' />
                     : <TbPhotoScan className='h-5 w-5' />
@@ -500,7 +551,12 @@ function App() {
                     Analyze
                   </span>
                 </button>
-                <div className='w-full'>
+                <div className='w-full flex flex-col gap-2'>
+                  <Switch
+                    label={'Translate to Bisaya'}
+                    initialState={false}
+                    onChange={toggleTranslation}
+                  />
                   <Switch
                     label={'Show Annotations'}
                     initialState={true}
@@ -565,23 +621,8 @@ function App() {
             </div>
           </>
         )}
-        <Dialog isOpen={isDialogOpen} onClose={closeDialog} title="Detailed Report">
-          <DiseaseDetails results={diseasesInfo(diseasesResult)} />
-        </Dialog>
-        <Dialog isOpen={isSettingsOpen} onClose={closeSettings} title="Settings">
-          <div className="flex flex-col justify-center items-center mx-32 gap-5">
-            <Switch
-              label={'Show Annotations'}
-              initialState={true}
-              onChange={toggleAnnotations}
-            />
-            <SliderRange
-              label={'Confidence'}
-              initialValue={25}
-              onChange={handleConfidenceChange}
-            />
-          </div>
-        </Dialog>
+
+
 
       </div >
     </>

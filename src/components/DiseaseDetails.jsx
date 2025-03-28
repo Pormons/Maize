@@ -25,7 +25,7 @@ const DiseaseDetails = ({ results }) => {
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
                   Symptoms
                 </h3>
-                <ul className="list-disc pl-5 text-gray-700">
+                <ul className="list-disc text-sm pl-5 text-gray-700">
                   {disease.symptoms.map((symptom, index) => (
                     <li key={index}>{symptom}</li>
                   ))}
@@ -38,7 +38,7 @@ const DiseaseDetails = ({ results }) => {
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
                   Causes
                 </h3>
-                <ul className="list-disc pl-5 text-gray-700">
+                <ul className="list-disc text-sm pl-5 text-gray-700">
                   {disease.cause.map((cause, index) => (
                     <li key={index}>{cause}</li>
                   ))}
@@ -51,10 +51,10 @@ const DiseaseDetails = ({ results }) => {
               <h3 className="text-lg font-medium text-gray-900 mb-2">
                 Prevention
               </h3>
-              <p className="text-gray-700 mb-2">
+              <p className="text-gray-700 text-sm mb-2">
                 {disease.prevention.description}
               </p>
-              <ul className="list-disc pl-5 text-gray-700">
+              <ul className="list-disc pl-5 text-sm text-gray-700">
                 {disease.prevention.steps.map((step, index) => (
                   <li key={index}>{step}</li>
                 ))}
@@ -66,10 +66,10 @@ const DiseaseDetails = ({ results }) => {
               <h3 className="text-lg font-medium text-gray-900 mb-2">
                 Treatment
               </h3>
-              <p className="text-gray-700 mb-2">
+              <p className="text-gray-700 mb-2 text-sm">
                 {disease.treatment.description}
               </p>
-              <ul className="list-disc pl-5 text-gray-700">
+              <ul className="list-disc pl-5 text-gray-700 text-sm">
                 {disease.treatment.steps.map((step, index) => (
                   <li key={index}>{step}</li>
                 ))}

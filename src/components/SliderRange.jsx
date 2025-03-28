@@ -13,7 +13,7 @@ const SliderRange = ({ id, label, initialValue = 50, onChange }) => {
 
   return (
     <div className="w-full max-w-xs">
-      <label htmlFor={id} className="block text-sm font-medium text-black mb-2">
+      <label htmlFor={id} className="block text-xs md:text-sm  font-medium text-black mb-2">
         {label}: {value}%
       </label>
       <input
