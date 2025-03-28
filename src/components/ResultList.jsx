@@ -24,6 +24,14 @@ function ResultList({ results }) {
 
   return (
     <ul className="space-y-3">
+      {results.length == 0 && (
+        <li className="flex items-center">
+          <div className="flex text-sm text-center justify-between items-center w-full">
+            <span className="font-medium text-xs text-center text-gray-900">  Non Detected</span>
+          </div>
+        </li>
+      )}
+
       {results.map((result, index) => {
         const colorClass = getColor(labelMap[result.class]);
         return (
