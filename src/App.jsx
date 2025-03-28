@@ -19,6 +19,8 @@ import { Camera, Home, Settings } from "lucide-react";
 import { supabase } from "./Supabase";
 import axios from "axios";
 import logo from "./assets/Icon.svg";
+import React from "react";
+import Webcam from "react-webcam";
 
 function App() {
   const [initializing, setInitializing] = useState(true);
@@ -399,93 +401,97 @@ function App() {
       <Dialog isOpen={isDialogOpen} onClose={closeDialog} title="Detailed Report">
         <DiseaseDetails results={diseasesInfo(diseasesResult, translate)} />
       </Dialog>
-      <div className="md:hidden relative w-full h-screen flex bg-[#081509] flex-col overflow-hidden">
-        {/* Floating Bottom Nav */}
-        <div className="fixed bottom-3 w-full flex justify-center">
-          <div className="bg-white rounded-full h-[4rem] w-[90%] shadow-lg flex justify-around items-center px-4 relative">
-            <button
-              onClick={handleButtonClick}
-              className="absolute transition-all hover:scale-95 top-[-30px] left-1/2 transform -translate-x-1/2 bg-green-600 hover:bg-green-700 text-white rounded-full w-[5rem] h-[5rem] flex items-center justify-center shadow-lg"
-            >
-              <Camera color="white" size={24} />
-            </button>
-            <button onClick={handleHome} className="text-gray-500 hover:text-black">
-              <Home color="black" size={24} />
-            </button>
-            <button className="text-gray-500 hover:text-black"></button>
-            <button onClick={openSettings} className="text-gray-500 hover:text-black">
-              <Settings color="black" size={24} />
-            </button>
-          </div>
-        </div>
+      <div className="relative w-full min-h-screen h-full flex bg-[#081509] flex-col overflow-hidden md:hidden">
 
-        <div className="h-full flex flex-col items-center">
-          {!selectedImage && (
-            <div className="text-center h-full text-white flex flex-col justify-center gap-5 items-center p-4">
-              <img src={logo} className="h-24 w-24" alt="logo" />
-              <h2 className="font-bold text-3xl">Welcome!</h2>
-              <p className="text-md">Click the camera button to start analyzing your maize leaf.</p>
-            </div>
-          )}
-
-          {selectedImage && (
-            <>
-              <div className="text-sm mt-12 text-white">
-                <span>created by: pormonskie</span>
-              </div>
-              <div
-                id="main-canvas"
-                className="relative flex justify-center items-center bg-white rounded-xl w-full h-[24rem] overflow-hidden"
-              >
-                <img
-                  src={selectedImage}
-                  alt="Resized"
-                  className="absolute h-full w-full object-contain"
-                />
-
-                {results.length > 0 && showAnnotations && (
-                  <img
-                    src={drawAnnotations(results)}
-                    alt="Annotations"
-                    className="absolute  h-[90%]"
-                    style={{ pointerEvents: "none" }}
-                  />
-                )}
-              </div>
-            </>
-          )}
-          {results.length > 0 && showConfindence && (
-            <div className='max-h-[6rem] w-[90%] p-2 rounded-lg mt-4 bg-white scrollbar scrollbar-thumb-green-800 scrollbar-track-transparent flex flex-col overflow-y-scroll'>
-              <ResultList results={results.filter(result => result.confidence * 100 >= confidence)} />
-            </div>
-          )}
-          <div className="px-24 mt-5 flex flex-col gap-2 w-full mb-24">
-            {selectedImage && (
-              <button
-                disabled={inferencing}
-                onClick={() => uploadImageToSupabase()}
-                className="bg-green-600 font-bold hover:scale-95 transition-all h-12 flex items-center justify-center gap-2 text-white text-[30px] w-full rounded-full"
-              >
-                {inferencing ? (
-                  <AiOutlineLoading3Quarters className="h-6 w-6 animate-spin" />
-                ) : (
-                  <TbPhotoScan className="h-6 w-6" />
-                )}
-                <span className="text-sm">Analyze Image</span>
-              </button>
-            )}
-            {results.length > 0 && (
-              <button
-                onClick={openDialog}
-                className="bg-blue-600 font-bold hover:scale-95 transition-all h-12 flex items-center justify-center gap-2 text-white text-[30px] w-full rounded-full"
-              >
-                <TbFileReport className="h-6 w-6" />
-                <span className="text-sm">Detailed Report</span>
-              </button>
-            )}
-          </div>
+      {/* Floating Bottom Nav */}
+      <div className="fixed bottom-3 w-full flex justify-center z-10">
+        <div className="bg-white rounded-full h-16 w-[90%] shadow-lg flex justify-around items-center px-4 relative">
+          <button
+            onClick={handleButtonClick}
+            className="absolute transition-all hover:scale-95 top-[-30px] left-1/2 transform -translate-x-1/2 bg-green-600 hover:bg-green-700 text-white rounded-full w-20 h-20 flex items-center justify-center shadow-lg"
+          >
+            <Camera color="white" size={24} />
+          </button>
+          <button onClick={handleHome} className="text-gray-500 hover:text-black">
+            <Home size={24} />
+          </button>
+          <div className="w-8"></div> {/* Spacer for center button */}
+          <button onClick={openSettings} className="text-gray-500 hover:text-black">
+            <Settings size={24} />
+          </button>
         </div>
       </div>
+
+      <div className="h-full flex flex-col items-center">
+        {!selectedImage && (
+          <div className="text-center h-full text-white flex flex-col justify-center gap-5 items-center p-4">
+              <img src={logo} className="h-12 w-12 text-white" />
+            <h2 className="font-bold text-3xl">Welcome!</h2>
+            <p className="text-md">Click the camera button to start analyzing your maize leaf.</p>
+          </div>
+        )}
+
+        {selectedImage && (
+          <>
+            <div className="text-sm mt-12 text-white">
+              <span>created by: pormonskie</span>
+            </div>
+            <div
+              id="main-canvas"
+              className="relative flex justify-center items-center bg-white rounded-xl w-[90%] h-[24rem] mt-4 overflow-hidden"
+            >
+              <img
+                src={selectedImage || "/placeholder.svg"}
+                alt="Resized"
+                className="absolute h-full w-full object-contain"
+              />
+
+              {results.length > 0 && showAnnotations && (
+                <img
+                  src={drawAnnotations(results) || "/placeholder.svg"}
+                  alt="Annotations"
+                  className="absolute h-[82%]"
+                  style={{ pointerEvents: "none" }}
+                />
+              )}
+            </div>
+          </>
+        )}
+
+        {results.length > 0 && showConfindence && (
+          <div className="max-h-24 w-[90%] p-2 rounded-lg mt-4 bg-white flex flex-col overflow-y-auto">
+            <ResultList results={results.filter((result) => result.confidence * 100 >= confidence)} />
+          </div>
+        )}
+
+        <div className="px-6 sm:px-24 mt-5 flex flex-col gap-2 w-full mb-32">
+          {selectedImage && (
+            <button
+              disabled={inferencing}
+              onClick={() => uploadImageToSupabase()}
+              className="bg-green-600 font-bold hover:scale-95 transition-all h-12 flex items-center justify-center gap-2 text-white w-full rounded-full disabled:opacity-70"
+            >
+              {inferencing ? (
+                <AiOutlineLoading3Quarters className="h-6 w-6 animate-spin" />
+              ) : (
+                <TbPhotoScan className="h-6 w-6" />
+              )}
+              <span className="text-sm">Analyze Image</span>
+            </button>
+          )}
+
+          {results.length > 0 && (
+            <button
+              onClick={openDialog}
+              className="bg-blue-600 font-bold hover:scale-95 transition-all h-12 flex items-center justify-center gap-2 text-white w-full rounded-full"
+            >
+              <TbFileReport className="h-6 w-6" />
+              <span className="text-sm">Detailed Report</span>
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
 
 
 
@@ -523,7 +529,8 @@ function App() {
                   accept="image/*"
                   ref={fileInputRef}
                   onChange={handleFileChange}
-                  className=' hidden' // Hide the file input
+                  className=' hidden'
+                  capture="environment"
                 />
                 <button onClick={handleButtonClick} className='grow-0 p-2 font-bold text-white transition-all hover:scale-95 hover:bg-green-600 flex items-center justify-center gap-2 bg-green-800 rounded-md w-full h-10 md:h-16'>
                   <IoMdPhotos className='h-5 w-5' />
