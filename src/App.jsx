@@ -40,13 +40,23 @@ function App() {
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState();
   const [diseasesResult, setDiseases] = useState([]);
+  const imageCaptureRef = useRef(null);
+  const [showCameraOptions, setCameraOptions] = useState(false);
 
 
   const handleButtonClick = () => {
     fileInputRef.current?.click(); // Trigger file input click
   };
 
-  const handleFileChange = (event) => {
+  const handleCameraClick = () => {
+    imageCaptureRef.current?.click(); // Trigger file input click
+  };
+
+  const toggleCameraOptions = () => {
+    setCameraOptions(value => !value);
+  }
+
+  const handleCaptureChange = (event) => {
     setResults([]);
     const file = event.target.files?.[0];
     if (file) {
@@ -126,6 +136,97 @@ function App() {
         img.src = e.target.result;
       };
       reader.readAsDataURL(file);
+      setCameraOptions(false);
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth' // Optional: adds smooth scrolling
+      });
+    }
+  };
+
+  const handleFileChange = (event) => {
+    setResults([]);
+    const file = event.target.files?.[0];
+    if (file) {
+
+      // Set metadata
+      setMetadata({
+        name: file.name,
+        type: file.type,
+        size: (file.size / (1024 * 1024)).toFixed(2)
+      });
+
+      // Read and display original image
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = async () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = 640;
+          canvas.height = 640;
+          const ctx = canvas.getContext('2d');
+
+          // Store resized dimensions instead of original
+          const dimensions = { width: canvas.width, height: canvas.height };
+
+          // Fill with black background
+          ctx.fillStyle = 'white';
+          ctx.fillRect(0, 0, 640, 640);
+
+          // Calculate scaling to maintain aspect ratio
+          const scale = Math.min(640 / img.width, 640 / img.height);
+          const scaledWidth = img.width * scale;
+          const scaledHeight = img.height * scale;
+
+          // Calculate centering position
+          const x = (640 - scaledWidth) / 2;
+          const y = (640 - scaledHeight) / 2;
+
+          // Draw the image centered with maintained aspect ratio
+          ctx.drawImage(img, x, y, scaledWidth, scaledHeight);
+
+          // Get image data for tensor processing
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const data = imageData.data;
+
+          // Create tensor array
+          const tensorArray = new Float32Array(3 * canvas.width * canvas.height);
+
+          // Convert image data to tensor format
+          for (let y = 0; y < canvas.height; y++) {
+            for (let x = 0; x < canvas.width; x++) {
+              const pixelIndex = (y * canvas.width + x) * 4;
+              const tensorIndex = y * canvas.width + x;
+
+              tensorArray[tensorIndex] = data[pixelIndex] / 255.0;
+              tensorArray[tensorIndex + canvas.width * canvas.height] =
+                data[pixelIndex + 1] / 255.0;
+              tensorArray[tensorIndex + 2 * canvas.width * canvas.height] =
+                data[pixelIndex + 2] / 255.0;
+            }
+          }
+
+          const tensorData = {
+            data: tensorArray,
+            shape: [1, 3, canvas.height, canvas.width]
+          };
+
+          // Store tensorData and resized dimensions
+          setTensorData(tensorData);
+          setImageDimensions(dimensions);
+
+          console.log('tensorData', tensorData);
+          console.log('dimensions', dimensions);
+
+          // Set the image preview
+          const resizedDataUrl = canvas.toDataURL('image/jpeg');
+          setSelectedImage(resizedDataUrl);
+        };
+        img.src = e.target.result;
+      };
+
+      reader.readAsDataURL(file);
+      setCameraOptions(false);
       window.scrollTo({
         top: 0,
         behavior: 'smooth' // Optional: adds smooth scrolling
@@ -377,7 +478,7 @@ function App() {
       <Dialog isOpen={isSettingsOpen} onClose={closeSettings} title="Settings">
         <div className="flex flex-col w-full justify-center items-center  gap-5">
           <Switch
-            label={'Translated to bisaya'}
+            label={'Translate to bisaya'}
             initialState={false}
             onChange={toggleTranslation}
           />
@@ -401,13 +502,40 @@ function App() {
       <Dialog isOpen={isDialogOpen} onClose={closeDialog} title="Detailed Report">
         <DiseaseDetails results={diseasesInfo(diseasesResult, translate)} />
       </Dialog>
+
+      <Dialog isOpen={showCameraOptions} onClose={toggleCameraOptions} title="">
+        <div className='flex flex-row gap-12 justify-center items-center'>
+          <div className='flex flex-col items-center justify-center'>
+            <button
+              onClick={handleCameraClick}
+              className=" transition-all hover:scale-95 bg-green-600 hover:bg-green-700 text-white rounded-full w-20 h-20 flex items-center justify-center shadow-lg"
+            >
+              <Camera color="white" size={24} />
+            </button>
+            <span className='text-sm font-semibold'>
+              Capture Image
+            </span>
+          </div>
+          <div className='flex flex-col items-center justify-center'>
+            <button
+              onClick={handleButtonClick}
+              className=" transition-all hover:scale-95 bg-green-600 hover:bg-green-700 text-white rounded-full w-20 h-20 flex items-center justify-center shadow-lg"
+            >
+              <Camera color="white" size={24} />
+            </button>
+            <span className='text-sm font-semibold'>
+              Upload Image
+            </span>
+          </div>
+        </div>
+      </Dialog>
       <div className="relative w-full min-h-screen h-full flex bg-[#081509] flex-col overflow-hidden md:hidden">
 
         {/* Floating Bottom Nav */}
         <div className="fixed bottom-3 w-full flex justify-center z-10">
           <div className="bg-white rounded-full h-16 w-[90%] shadow-lg flex justify-around items-center px-4 relative">
             <button
-              onClick={handleButtonClick}
+              onClick={toggleCameraOptions}
               className="absolute transition-all hover:scale-95 top-[-30px] left-1/2 transform -translate-x-1/2 bg-green-600 hover:bg-green-700 text-white rounded-full w-20 h-20 flex items-center justify-center shadow-lg"
             >
               <Camera color="white" size={24} />
@@ -529,6 +657,14 @@ function App() {
                   accept="image/*"
                   ref={fileInputRef}
                   onChange={handleFileChange}
+                  className=' hidden'
+
+                />
+                <input
+                  type="file"
+                  accept="image/*"
+                  ref={imageCaptureRef}
+                  onChange={handleCaptureChange}
                   className=' hidden'
                   capture="environment"
                 />
