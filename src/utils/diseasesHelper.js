@@ -1,6 +1,6 @@
 export const translated = [
   {
-    label: "Common Corn Rust",
+    label: "Common Corn Rust (Fungal)",
     cause: [
       "Fungal pathogen Puccinia sorghi",
       "Bugnaw nga temperatura (15-21°C)",
@@ -34,7 +34,7 @@ export const translated = [
     },
   },
   {
-    label: "Northern Leaf Blight",
+    label: "Northern Leaf Blight (Fungal)",
     cause: [
       "Fungal pathogen Exserohilum turcicum",
       "Kasagaran nga temperatura (18-27°C)",
@@ -68,7 +68,7 @@ export const translated = [
     },
   },
   {
-    label: "Gray Leaf Spot",
+    label: "Gray Leaf Spot (Fungal)",
     cause: [
       "Init nga temperatura (24-29°C)",
       "Taas nga kaumog (>90%)",
@@ -104,7 +104,7 @@ export const translated = [
 
 export const diseases = [
   {
-    label: "Common Corn Rust",
+    label: "Common Corn Rust (Fungal)",
     cause: [
       "Fungal pathogen Puccinia sorghi",
       "Cool temperatures (60-70°F)",
@@ -138,7 +138,7 @@ export const diseases = [
     },
   },
   {
-    label: "Northern Leaf Blight",
+    label: "Northern Leaf Blight (Fungal)",
     cause: [
       "Fungal pathogen Exserohilum turcicum",
       "Moderate temperatures (64-81°F)",
@@ -172,7 +172,7 @@ export const diseases = [
     },
   },
   {
-    label: "Gray Leaf Spot",
+    label: "Gray Leaf Spot (Fungal)",
     cause: [
       "Fungal pathogen Cercospora zeae-maydis",
       "Warm temperatures (75-85°F)",
