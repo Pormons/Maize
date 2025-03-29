@@ -15,7 +15,7 @@ import ResultList from './components/ResultList';
 import SliderRange from './components/SliderRange';
 import Switch from './components/Switch';
 import { diseasesInfo } from './utils/diseasesHelper';
-import { Camera, Home, Settings } from "lucide-react";
+import { Camera, Home, Image, Settings } from "lucide-react";
 import { supabase } from "./Supabase";
 import axios from "axios";
 import logo from "./assets/Icon.svg";
@@ -521,7 +521,7 @@ function App() {
               onClick={handleButtonClick}
               className=" transition-all hover:scale-95 bg-green-600 hover:bg-green-700 text-white rounded-full w-20 h-20 flex items-center justify-center shadow-lg"
             >
-              <Camera color="white" size={24} />
+              <Image color="white" size={24} />
             </button>
             <span className='text-sm font-semibold'>
               Upload Image
