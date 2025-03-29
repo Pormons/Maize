@@ -289,10 +289,10 @@ function App() {
       });
 
       const labelMap = {
-        'healthy': 'Healthy',
-        'corn_rust': 'Common Corn Rust',
-        'leaf_blight': 'Northern Leaf Blight',
-        'leaf_spot': 'Gray Leaf Spot'
+        'healthy': 'Healthy (Fungal)',
+        'corn_rust': 'Common Corn Rust (Fungal)',
+        'leaf_blight': 'Northern Leaf Blight (Fungal)',
+        'leaf_spot': 'Gray Leaf Spot (Fungal)'
       }
 
       setResults(response.data.predictions)
@@ -372,10 +372,10 @@ function App() {
       'Gray Leaf Spot': '#3b82f6'
     };
     const labelMap = {
-      'healthy': 'Healthy',
-      'corn_rust': 'Common Corn Rust',
-      'leaf_blight': 'Northern Leaf Blight',
-      'leaf_spot': 'Gray Leaf Spot'
+      'healthy': 'Healthy (Fungal)',
+      'corn_rust': 'Common Corn Rust (Fungal)',
+      'leaf_blight': 'Northern Leaf Blight (Fungal)',
+      'leaf_spot': 'Gray Leaf Spot (Fungal)'
     }
 
 
