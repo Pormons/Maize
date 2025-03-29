@@ -211,7 +211,7 @@ export const diseasesInfo = (detections, translate) => {
   if (!detections || detections.length === 0) return [];
 
   if (translate) {
-    const uniqueLabels = [...new Set(detections.map((item) => item))];
+    const uniqueLabels = [...new Set(detections.map((item) => item.label))];
 
     // Filter the diseases array to return only the diseases with matching labels
     const filteredDiseases = translated.filter((disease) =>
@@ -223,7 +223,7 @@ export const diseasesInfo = (detections, translate) => {
   }
 
   // Extract unique labels from the detections
-  const uniqueLabels = [...new Set(detections.map((item) => item))];
+  const uniqueLabels = [...new Set(detections.map((item) => item.label))];
 
   // Filter the diseases array to return only the diseases with matching labels
   const filteredDiseases = diseases.filter((disease) =>

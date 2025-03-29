@@ -296,8 +296,13 @@ function App() {
       }
 
       setResults(response.data.predictions)
-      const diseases = response.data.predictions.map(value => labelMap[value.class]);
+      const diseases = response.data.predictions.map(value => ({
+        label: labelMap[value.class],
+        confidence: value.confidence
+      }));
+
       setDiseases(diseases);
+      console.log(diseases);
 
       console.log('response', response.data.predictions);
       setInferencing(false);
@@ -500,7 +505,7 @@ function App() {
         </div>
       </Dialog>
       <Dialog isOpen={isDialogOpen} onClose={closeDialog} title="Detailed Report">
-        <DiseaseDetails results={diseasesInfo(diseasesResult, translate)} />
+        <DiseaseDetails results={diseasesInfo(diseasesResult.filter((item) => item.confidence * 100 >= confidence), translate)} />
       </Dialog>
 
       <Dialog isOpen={showCameraOptions} onClose={toggleCameraOptions} title="">
