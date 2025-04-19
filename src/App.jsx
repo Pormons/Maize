@@ -276,10 +276,10 @@ function App() {
 
       const response = await axios({
         method: "POST",
-        url: "https://detect.roboflow.com/maize-detection-ojwjw/7", // Replace with your actual model endpoint
+        url: "", // Replace with your actual model endpoint
         params: {
-          api_key: import.meta.env.VITE_API_KEY, // Replace with your actual API key
-          image: urlData.publicUrl, // Image URL or base64 image string
+          api_key: import.meta.env.VITE_API_KEY,
+          image: urlData.publicUrl,
           confidence: 10,
         },
         headers: {
@@ -566,9 +566,6 @@ function App() {
 
           {selectedImage && (
             <>
-              <div className="text-sm mt-12 text-white">
-                <span>created by: pormonskie</span>
-              </div>
               <div
                 id="main-canvas"
                 className="relative flex justify-center items-center bg-white rounded-xl w-[90%] h-[24rem] mt-4 overflow-hidden"
