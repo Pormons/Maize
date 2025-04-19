@@ -276,7 +276,7 @@ function App() {
 
       const response = await axios({
         method: "POST",
-        url: "", // Replace with your actual model endpoint
+        url: "https://detect.roboflow.com/maize-detection-ojwjw/7", // Replace with your actual model endpoint
         params: {
           api_key: import.meta.env.VITE_API_KEY,
           image: urlData.publicUrl,
