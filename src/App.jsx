@@ -289,7 +289,7 @@ function App() {
       });
 
       const labelMap = {
-        'healthy': 'Healthy (Fungal)',
+        'healthy': 'Healthy',
         'corn_rust': 'Common Corn Rust (Fungal)',
         'leaf_blight': 'Northern Leaf Blight (Fungal)',
         'leaf_spot': 'Gray Leaf Spot (Fungal)'
