@@ -5,14 +5,14 @@ function ResultList({ results }) {
   // Predefined color map for specific labels
   const colorMap = {
     'Healthy': 'text-green-500',
-    'Common Corn Rust': 'text-amber-500',
+    'Common Rust': 'text-amber-500',
     'Northern Leaf Blight': 'text-red-500',
     'Gray Leaf Spot': 'text-blue-500'
   };
 
   const labelMap = {
     'healthy': 'Healthy',
-    'corn_rust': 'Common Corn Rust',
+    'corn_rust': 'Common Rust',
     'leaf_blight': 'Northern Leaf Blight',
     'leaf_spot': 'Gray Leaf Spot'
   }

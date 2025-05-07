@@ -1,6 +1,6 @@
 export const translated = [
   {
-    label: "Common Corn Rust (Fungal)",
+    label: "Common Rust (Fungal)",
     cause: [
       "Fungal pathogen Puccinia sorghi",
       "Bugnaw nga temperatura (15-21°C)",

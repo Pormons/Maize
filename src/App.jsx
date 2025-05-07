@@ -21,6 +21,7 @@ import axios from "axios";
 import logo from "./assets/Icon.svg";
 import React from "react";
 import Webcam from "react-webcam";
+import { dataURLToFile } from './utils/helper';
 
 function App() {
   const [initializing, setInitializing] = useState(true);
@@ -42,6 +43,7 @@ function App() {
   const [diseasesResult, setDiseases] = useState([]);
   const imageCaptureRef = useRef(null);
   const [showCameraOptions, setCameraOptions] = useState(false);
+  const [resizedFile, setResizedFile] = useState();
 
 
   const handleButtonClick = () => {
@@ -132,6 +134,10 @@ function App() {
           // Set the image preview
           const resizedDataUrl = canvas.toDataURL('image/jpeg');
           setSelectedImage(resizedDataUrl);
+
+          // NEW: create a File from it for uploading
+          const resized = dataURLToFile(resizedDataUrl, file.name);
+          setResizedFile(resized); // store this for your upload
         };
         img.src = e.target.result;
       };
@@ -221,6 +227,10 @@ function App() {
           // Set the image preview
           const resizedDataUrl = canvas.toDataURL('image/jpeg');
           setSelectedImage(resizedDataUrl);
+
+          // NEW: create a File from it for uploading
+          const resized = dataURLToFile(resizedDataUrl, file.name);
+          setResizedFile(resized); // store this for your upload
         };
         img.src = e.target.result;
       };
@@ -255,47 +265,68 @@ function App() {
     }
 
     try {
-      const blob = dataURLtoBlob(selectedImage);
+      let response;
+      const env = import.meta.env.VITE_APP_ENV ?? 'production';
 
-      const fileName = `image_${Date.now()}.jpg`; // Generate unique filename
+      if (env == 'production') {
 
-      const { data, error } = await supabase.storage
-        .from("detections") // Replace with your actual bucket name
-        .upload(`uploads/${fileName}`, blob, {
-          cacheControl: "3600",
-          upsert: true,
+        console.log('production mode');
+        const blob = dataURLtoBlob(selectedImage);
+
+        const fileName = `image_${Date.now()}.jpg`; // Generate unique filename
+
+        const { data, error } = await supabase.storage
+          .from("detections") // Replace with your actual bucket name
+          .upload(`uploads/${fileName}`, blob, {
+            cacheControl: "3600",
+            upsert: true,
+          });
+
+        if (error) {
+          throw error;
+        }
+
+        const { data: urlData } = supabase.storage
+          .from("detections")
+          .getPublicUrl(`uploads/${fileName}`);
+
+        response = await axios({
+          method: "POST",
+          url: "https://detect.roboflow.com/maize-detection-ojwjw/7", 
+          params: {
+            api_key: import.meta.env.VITE_API_KEY,
+            image: urlData.publicUrl,
+            confidence: 10,
+          },
+          headers: {
+            "Content-Type": "application/json",
+          },
         });
 
-      if (error) {
-        throw error;
+      } else {
+        console.log(resizedFile);
+        console.log('local mode');
+        const formData = new FormData();
+        formData.append('file', resizedFile);
+
+        response = await axios({
+          method: "POST",
+          url: import.meta.env.VITE_LOCAL_URL,
+          data: formData,
+        });
       }
 
-      const { data: urlData } = supabase.storage
-        .from("detections")
-        .getPublicUrl(`uploads/${fileName}`);
 
-      const response = await axios({
-        method: "POST",
-        url: "https://detect.roboflow.com/maize-detection-ojwjw/7", // Replace with your actual model endpoint
-        params: {
-          api_key: import.meta.env.VITE_API_KEY,
-          image: urlData.publicUrl,
-          confidence: 10,
-        },
-        headers: {
-          "Content-Type": "application/json", // Example of setting content type
-        },
-
-      });
 
       const labelMap = {
         'healthy': 'Healthy',
-        'corn_rust': 'Common Corn Rust (Fungal)',
+        'corn_rust': 'Common Rust (Fungal)',
         'leaf_blight': 'Northern Leaf Blight (Fungal)',
         'leaf_spot': 'Gray Leaf Spot (Fungal)'
       }
 
       setResults(response.data.predictions)
+      console.log('responses', response.data)
       const diseases = response.data.predictions.map(value => ({
         label: labelMap[value.class],
         confidence: value.confidence
@@ -367,13 +398,13 @@ function App() {
 
     const colorMap = {
       'Healthy': '#22c55e',
-      'Common Corn Rust': '#f59e0b',
-      'Northern Leaf Blight': '#ef4444',
-      'Gray Leaf Spot': '#3b82f6'
+      'Common Rust (Fungal)': '#f59e0b',
+      'Northern Leaf Blight (Fungal)': '#ef4444',
+      'Gray Leaf Spot (Fungal)': '#3b82f6'
     };
     const labelMap = {
       'healthy': 'Healthy',
-      'corn_rust': 'Common Corn Rust (Fungal)',
+      'corn_rust': 'Common Rust (Fungal)',
       'leaf_blight': 'Northern Leaf Blight (Fungal)',
       'leaf_spot': 'Gray Leaf Spot (Fungal)'
     }
@@ -756,7 +787,7 @@ function App() {
                       <img
                         src={drawAnnotations(results)}
                         alt="Annotations"
-                        className="absolute h-[97%]"
+                        className="absolute h-[85%]"
                         style={{ pointerEvents: 'none' }} // Ensure it doesn't block clicks
                       />
                     )}
