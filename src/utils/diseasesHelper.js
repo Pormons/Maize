@@ -104,7 +104,7 @@ export const translated = [
 
 export const diseases = [
   {
-    label: "Common Corn Rust (Fungal)",
+    label: "Common Rust (Fungal)",
     cause: [
       "Fungal pathogen Puccinia sorghi",
       "Cool temperatures (60-70°F)",
